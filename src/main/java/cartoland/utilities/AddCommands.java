@@ -780,7 +780,41 @@ public final class AddCommands
 						new SubcommandData(LightOutCommand.GIVE_UP, "Give up the game")
 							.setDescriptionLocalization(CHINESE_TAIWAN, "放棄遊戲")
 							.setDescriptionLocalization(CHINESE_CHINA, "放弃游戏")),
-
+			Commands.slash(DRAGON, "Play a game of Dragon")
+					.setDescriptionLocalization(CHINESE_TAIWAN, "玩一場射龍門")
+					.setDescriptionLocalization(CHINESE_CHINA, "玩一场射龙门")
+					.addSubcommands(
+						new SubcommandData(DragonCommand.BET, "Bet some command blocks")
+							.setDescriptionLocalization(CHINESE_TAIWAN, "賭上一些指令方塊")
+							.setDescriptionLocalization(CHINESE_CHINA, "赌上一些命令方块")
+							.addOptions(
+								new OptionData(OptionType.STRING, "bet", "The amount of your command blocks you want to bet", true, false)
+									.setNameLocalization(CHINESE_TAIWAN, "賭注")
+									.setNameLocalization(CHINESE_CHINA, "賭注")
+									.setDescriptionLocalization(CHINESE_TAIWAN, "想賭上的數量")
+									.setDescriptionLocalization(CHINESE_CHINA, "想赌上的数量")),
+						new SubcommandData(DragonCommand.DRAW, "Draw a card")
+							.setDescriptionLocalization(CHINESE_TAIWAN, "進牌")
+							.setDescriptionLocalization(CHINESE_CHINA, "进牌"),
+						new SubcommandData(DragonCommand.COMPARE, "Choose bigger or smaller")
+							.setDescriptionLocalization(CHINESE_TAIWAN, "選擇比大或比小")
+							.setDescriptionLocalization(CHINESE_CHINA, "选择比大或比小")
+							.addOptions(
+								new OptionData(OptionType.STRING, "compare", "Bigger or smaller", true, true)
+									.setNameLocalization(CHINESE_TAIWAN, "比大或比小")
+									.setNameLocalization(CHINESE_CHINA, "比大或比小")
+									.setDescriptionLocalization(CHINESE_TAIWAN, "想賭上的數量")
+									.setDescriptionLocalization(CHINESE_CHINA, "想赌上的数量")
+									.addChoices(
+										new Command.Choice("Smaller", 0)
+											.setNameLocalization(CHINESE_TAIWAN, "比小")
+											.setNameLocalization(CHINESE_CHINA, "比小"),
+										new Command.Choice("Bigger", 1)
+											.setNameLocalization(CHINESE_TAIWAN, "比大")
+											.setNameLocalization(CHINESE_CHINA, "比大"))),
+						new SubcommandData(DragonCommand.GIVE_UP, "Give up the game")
+							.setDescriptionLocalization(CHINESE_TAIWAN, "放棄遊戲")
+							.setDescriptionLocalization(CHINESE_CHINA, "放弃游戏")),
 			Commands.message(RAW_TEXT)
 					.setNameLocalization(CHINESE_TAIWAN, "原始文字")
 					.setNameLocalization(CHINESE_CHINA, "原始文本"),
