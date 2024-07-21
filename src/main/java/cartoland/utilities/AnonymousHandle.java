@@ -55,16 +55,17 @@ public final class AnonymousHandle
 
 		final String can_t = ", hence you can't send message to the NSFW channel.";
 
+		//雖然JDA官方群組說除非必要否則別用complete()
+		//但是這裡不用的話會有同步問題
 		Member member = cartoland.retrieveMemberById(userID).complete();
+
 		if (member == null) //不是成員
 			return returnData.string("You are not a member of " + cartoland.getName() + can_t);
-
-		if (member.isTimedOut()) //使用者已被禁言
+		else if (member.isTimedOut()) //使用者已被禁言
 			return returnData.string("You are timed out from " + cartoland.getName() + can_t);
-
-		if (!member.getRoles().contains(nsfwRole)) //使用者沒有地下身分組
+		else if (!member.getRoles().contains(nsfwRole)) //使用者沒有地下身分組
 			return returnData.string("You don't have role " + nsfwRole.getName() + can_t);
-
-		return returnData.object(undergroundChannel); //回傳地下頻道
+		else
+			return returnData.object(undergroundChannel); //回傳地下頻道
 	}
 }

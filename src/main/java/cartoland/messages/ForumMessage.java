@@ -1,13 +1,13 @@
 package cartoland.messages;
 
-import cartoland.utilities.ForumsHandle;
 import cartoland.utilities.IDs;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
+import cartoland.utilities.QuestionForumHandle;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+
+import java.util.Set;
 
 /**
  * {@code ForumMessage} is a listener that triggers when a user types anything in any post in Map-Discuss forum
@@ -19,32 +19,26 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
  */
 public class ForumMessage implements IMessage
 {
+	private ThreadChannel forumPost;
+	private final Set<Long> pinFirstMessage = Set.of(IDs.MAP_DISCUSS_CHANNEL_ID, IDs.RESOURCE_CHANNEL_ID, IDs.POOP_JAM_CHANNEL_ID);
+
 	@Override
 	public boolean messageCondition(MessageReceivedEvent event)
 	{
-		Category category = event.getMessage().getCategory();
-		//獲取類別失敗就不執行後面那個
-		return category != null && category.getIdLong() == IDs.FORUM_CATEGORY_ID;
+		return event.getChannel() instanceof ThreadChannel thread && (forumPost = thread).getParentChannel().getType() == ChannelType.FORUM;
 	}
 
 	@Override
 	public void messageProcess(MessageReceivedEvent event)
 	{
-		ThreadChannel forumPost = (ThreadChannel) event.getChannel();
-		Message message = event.getMessage();
-
-		if (ForumsHandle.questionForumPostIsIdled(forumPost)) //是問題貼文 且處在閒置狀態
-			ForumsHandle.unIdleQuestionForumPost(forumPost, false);
-
-		if (ForumsHandle.isFirstMessage(forumPost)) //如果是第一次傳送初始訊息
-			ForumsHandle.startStuff(forumPost); //傳送指南
-
-		if (!ForumsHandle.typedResolved(message)) //不是:resolved:表情符號
-			return;
-
-		Member member = event.getMember();
-		if (member == null || (member.getIdLong() != forumPost.getOwnerIdLong() && member.hasPermission(Permission.MANAGE_THREADS)))
-			return; //不是討論串擁有者 且 沒有管理討論串的權限
-		ForumsHandle.archiveForumPost(forumPost, message);
+		long parentID = forumPost.getParentChannel().getIdLong();
+		if (pinFirstMessage.contains(parentID)) //是地圖論壇或素材頻道
+		{
+			Message message = event.getMessage();
+			if (forumPost.getIdLong() == message.getIdLong()) //是第一則訊息
+				message.pin().queue(); //釘選訊息
+		}
+		else if (QuestionForumHandle.isQuestionPost(parentID)) //是疑難雜症
+			QuestionForumHandle.getInstance(forumPost).messageEvent(event); //找到handle並執行事件
 	}
 }

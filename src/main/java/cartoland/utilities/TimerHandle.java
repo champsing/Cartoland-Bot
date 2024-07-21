@@ -66,6 +66,8 @@ public final class TimerHandle
 		}
 	}
 
+	private static final ZoneId utc8 = ZoneId.of("UTC+8");
+
 	private static final short DAYS = 366; //一年有366天
 	private static final short HOURS = 24; //一天有24小時
 
@@ -103,7 +105,7 @@ public final class TimerHandle
 		TimerHandle.registerTimerEvent(new TimerEvent(zero, FileHandle::flushLog)); //更換log的日期
 		TimerHandle.registerTimerEvent(new TimerEvent(zero, () -> //和生日有關的
 		{
-			LocalDate today = LocalDate.now();
+			LocalDate today = LocalDate.now(utc8);
 			Set<Long> birthdayMembersID = birthdayToIDs.get(Birthday.valueOf(today.getMonthValue(), today.getDayOfMonth())); //今天生日的成員們的ID
 			if (birthdayMembersID.isEmpty()) //今天沒有人生日
 				return;
@@ -124,22 +126,11 @@ public final class TimerHandle
 			undergroundChannel.sendMessage("https://i.imgur.com/c0HCirP.jpg").queue(); //誰會想在凌晨三點吃美味蟹堡
 			undergroundChannel.sendMessage("https://i.imgur.com/EGO35hf.jpg").queue(); //好棒，三點了
 		}));
-
-		final byte twelve = 12;
-		//中午12點
-		TimerHandle.registerTimerEvent(new TimerEvent(twelve, () -> //中午十二點時處理並提醒未解決的論壇貼文
-		{
-			ForumChannel questionsChannel = Cartoland.getJDA().getForumChannelById(IDs.QUESTIONS_CHANNEL_ID); //疑難雜症頻道
-			if (questionsChannel == null)
-				return; //找不到就算了
-			for (ThreadChannel forumPost : questionsChannel.getThreadChannels()) //走訪論壇貼文們
-				ForumsHandle.tryIdleQuestionForumPost(forumPost); //試著讓它們idle
-		}));
 	}
 
 	//https://stackoverflow.com/questions/65984126
 	private static final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-	private static int nowHour = LocalTime.now().getHour(); //現在是幾點
+	private static int nowHour = LocalTime.now(utc8).getHour(); //現在是幾點
 	private static long hoursFrom1970 = System.currentTimeMillis() / (1000 * 60 * 60); //從1970年1月1日開始過了幾個小時
 	private static final ScheduledFuture<?> everyHour = executorService.scheduleAtFixedRate(() -> //每小時執行一次
 	{
@@ -157,6 +148,11 @@ public final class TimerHandle
 
 		for (Runnable event : hourRunFunctions[nowHour]) //走訪被註冊的事件們
 			event.run(); //執行
+
+		ForumChannel questionsChannel = Cartoland.getJDA().getForumChannelById(IDs.QUESTIONS_CHANNEL_ID); //疑難雜症頻道
+		if (questionsChannel != null) //找不到就算了
+			for (ThreadChannel forumPost : questionsChannel.getThreadChannels()) //走訪論壇貼文們
+				QuestionForumHandle.getInstance(forumPost).remind(); //試著提醒
 
 		//根據現在的時間 決定是否解ban
 		if (AdminCommand.tempBanSet.isEmpty()) //沒有人被temp_ban
@@ -233,7 +229,7 @@ public final class TimerHandle
 
 	private static long secondsUntil(int hour)
 	{
-		LocalDateTime now = LocalDateTime.now(); //現在的時間
+		LocalDateTime now = LocalDateTime.now(utc8); //現在的時間
 		LocalDateTime untilTime = now.withHour(hour).withMinute(0).withSecond(0); //目標時間
 
 		//如果現在的小時已經超過了目標的小時 例如要在3點時執行 但現在的時間已經4點了 那就明天再執行 否則今天就可執行
@@ -293,12 +289,12 @@ public final class TimerHandle
 
 	public static int[] getTime()
 	{
-		LocalTime now = LocalTime.now(); //現在
+		LocalTime now = LocalTime.now(utc8); //現在
 		return new int[] {now.getHour(), now.getMinute(), now.getSecond()};
 	}
 
 	public static String getDateString()
 	{
-		return LocalDate.now().toString();
+		return LocalDate.now(utc8).toString();
 	}
 }

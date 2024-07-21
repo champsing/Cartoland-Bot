@@ -93,7 +93,7 @@ public class BotCanTalkChannelMessage implements IMessage
 		"https://imgur.com/gPlBEMV" //我越來越接近電話了
 	};
 
-	private final Set<Long> canTalkCategories = Set.of(IDs.GENERAL_CATEGORY_ID, IDs.FORUM_CATEGORY_ID, IDs.VOICE_CATEGORY_ID, IDs.DANGEROUS_CATEGORY_ID);
+	private final Set<Long> canTalkCategories = Set.of(IDs.GENERAL_CATEGORY_ID, IDs.VOICE_CATEGORY_ID, IDs.DANGEROUS_CATEGORY_ID);
 
 	private final Map<String, String[]> keywords =
 		Map.of("早安", new String[]{ "早上好中國 現在我有 Bing Chilling","早上好創聯 現在我有 Bing Chilling","道聲「早安」\n卻又讓我做了夢\n自然而然的生活方式不是很好嗎？" },
@@ -122,7 +122,6 @@ public class BotCanTalkChannelMessage implements IMessage
 		if (message.getMentions().isMentioned(event.getJDA().getSelfUser(), Message.MentionType.USER, Message.MentionType.ROLE)) //有人tag機器人
 		{
 			long userID = author.getIdLong();
-			long channelID = channel.getIdLong();
 
 			//不要再想著用switch了 Java的switch不支援long
 			if (userID == IDs.AC_ID) //是AC
@@ -131,6 +130,7 @@ public class BotCanTalkChannelMessage implements IMessage
 				message.reply(Algorithm.randomElement(replyMegaMention)).mentionRepliedUser(false).queue();
 			else //是其他人
 			{
+				long channelID = channel.getIdLong();
 				if (channelID == IDs.BOT_CHANNEL_ID || channelID == IDs.UNDERGROUND_CHANNEL_ID) //如果頻道在機器人或地下 就正常地回傳replyMention
 					message.reply(Algorithm.randomElement(replyMention)).mentionRepliedUser(false).queue();
 				else //在其他地方ping就固定加一個ping的emoji
