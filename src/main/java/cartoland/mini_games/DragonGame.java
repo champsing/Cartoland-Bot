@@ -6,6 +6,7 @@ public class DragonGame extends MiniGame {
     private static int[] CARD_NUMBER = {0,0,0};
 
     public DragonGame() {
+        
         Algorithm.randomCardNumber(CARD_NUMBER[0]);
         Algorithm.randomCardNumber(CARD_NUMBER[1]);
         
@@ -16,11 +17,19 @@ public class DragonGame extends MiniGame {
             Algorithm.randomCardNumber(CARD_NUMBER[2]);
         }
     }
-    
-    public 
+
+    //TODO: getCard(), giveUp(), drawCard() (maybe Map?)
 
     @Override
     public String gameName() {
         return "dragon_game";
     }
+
+    // public String getCard() {
+        
+    // }
+
+    // public String giveUp() {
+        
+    // }
 }

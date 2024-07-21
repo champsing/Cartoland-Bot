@@ -39,7 +39,7 @@ public class LotteryCommand extends HasSubcommands
 		subcommands.put(SLOT, new SlotSubCommand());
 	}
 
-	private static ObjectAndString createValidBet(String betString, long userID, long nowHave)
+	public static ObjectAndString createValidBet(String betString, long userID, long nowHave)
 	{
 		ObjectAndString validBet = new ObjectAndString();
 		long bet;
