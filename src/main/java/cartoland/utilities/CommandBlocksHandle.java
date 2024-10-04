@@ -28,20 +28,33 @@ public final class CommandBlocksHandle
 
 	public static boolean changed = true; //清單是否更改過 用於決定/lottery ranking時是否重新排序
 	private static final String LOTTERY_DATA_FILE_NAME = "serialize/lottery_data.ser";
+	private static final String DRAGON_DATA_FILE_NAME = "serialize/dragon_data.ser";
 	private static final long GAMBLE_ROLE_MIN = 100000L;
 
 	//會有unchecked assignment的警告 but I did it anyway
 	@SuppressWarnings("unchecked")
 	private static final Map<Long, LotteryData> lotteryDataMap = CastToInstance.modifiableMap(FileHandle.deserialize(LOTTERY_DATA_FILE_NAME));
+	//會有unchecked assignment的警告 but 我跟著AC did it anyway
+	@SuppressWarnings("unchecked")
+	private static final Map<Long, DragonData> dragonDataMap = CastToInstance.modifiableMap(FileHandle.deserialize(DRAGON_DATA_FILE_NAME));
+
 
 	public static final List<LotteryData> lotteryDataList = new ArrayList<>(lotteryDataMap.values()); //將map轉換為array list
 	//因為每次修改的是LotteryData的內容 而不是參考本身 所以可以事先建好
 	//它唯一的用處是ranking時的排序 相對來說風險比較小 因此直接設成public
+	public static final List<DragonData> DragonDataList = new ArrayList<>(dragonDataMap.values()); //將map轉換為array list
+
 
 	static
 	{
 		FileHandle.registerSerialize(LOTTERY_DATA_FILE_NAME, lotteryDataMap);
 	}
+
+	static
+	{
+		FileHandle.registerSerialize(DRAGON_DATA_FILE_NAME, dragonDataMap);
+	}
+
 
 	/**
 	 * Get the lottery data of a user from ID.
@@ -309,6 +322,93 @@ public final class CommandBlocksHandle
 		public int getStreak()
 		{
 			return streak;
+		}
+	}
+
+	/**
+	 * Get the dragon data of a user from ID.
+	 *
+	 * @param userID The ID of the user.
+	 * @return The lottery data of the user. It will never be null.
+	 * @since 2.0
+	 * @author Alex Cai
+	 */
+	public static DragonData getDragonData(long userID)
+	{
+		DragonData DragonData = dragonDataMap.get(userID); //從map中獲得指令方塊資料
+		if (DragonData != null) //已經有這名玩家
+			return DragonData;
+
+		//如果沒有記錄這名玩家
+		DragonData newUser = new DragonData(userID); //建立新資料
+		dragonDataMap.put(userID, newUser); //放入這名玩家
+		DragonDataList.add(newUser); //放入這名玩家
+		Cartoland.getJDA().retrieveUserById(userID).queue(user -> newUser.name = user.getEffectiveName()); //初始化新資料
+		return newUser; //絕不回傳null
+	}
+
+	/**
+	 * This is a data class that stores members' dragon data.
+	 *
+	 * @since 2.2
+	 * @author champsing
+	 */
+	public static class DragonData implements Serializable
+	{
+		private String name; //名字
+		private long blocks; //方塊數
+		private final long userID;//addBlocks(), setBlocks()只能non-static
+		private int dragonWon; //射龍門勝場
+		private int dragonLost; //射龍門敗場
+		private int dragonShowHandWon; //梭哈勝
+		private int dragonShowHandLost; //梭哈敗(破產)
+
+		@Serial
+		private static final long serialVersionUID = 3_141592653589793238L;
+
+		private DragonData(long userID)
+		{
+			this.userID = userID;
+			blocks = 0L;
+			dragonWon = 0;
+			dragonLost = 0;
+			dragonShowHandWon = 0;
+			dragonShowHandLost = 0;
+		}
+
+		public void setName(String newName)
+		{
+			name = newName;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public long getBlocks()
+		{
+			return blocks;
+		}
+
+		public int getDragonWon()
+		{
+			return dragonWon;
+		}
+
+		public int getDragonLost()
+		{
+			return dragonLost;
+		}
+
+		public int getDragonShowHandWon()
+		{
+			return dragonShowHandWon;
+		}
+
+		public int getDragonShowHandLost()
+		{
+			return dragonShowHandLost;
 		}
 	}
 }
