@@ -173,20 +173,4 @@ public final class Algorithm
 	{
 		return list.get(random.nextInt(list.size()));
 	}
-
-	/**
-	 * Returns a random poker card number.
-	 *
-	 * @param cardnumber The variable that is going to be a random number in between (0,13].
-	 * @return A random int card number in between (0,13].
-	 * @since 2.3
-	 * @author Champsing
-	 */
-	public static int randomCardNumber(int cardnumber)
-	{
-		while (cardnumber == 0) {
-			cardnumber = random.nextInt(14);
-		}
-		return cardnumber;
-	}
 }
